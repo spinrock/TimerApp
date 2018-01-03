@@ -7,36 +7,43 @@
 //
 
 import UIKit
+import AudioToolbox
 
 class ViewController: UIViewController {
+    // 時間表示用のラベル
     @IBOutlet weak var timerDisp: UILabel!
     
     @IBOutlet weak var timerBtn: UIButton!
     // 時間計測用の変数
-    var cnt : Float = 0
-    
+    var cnt : Double = 0
+    let formatter = DateComponentsFormatter()
+
     // スイッチ用のフラグ
     var swflg : Bool = false
     
-    // 時間表示用のラベル
-//      var myLabel : UILabel!
+    
+    // shutter
+//    var soundIdRing:SystemSoundID = 1108
+    
+    // bell
+    var soundIdRing:SystemSoundID = 1000
+    
+    // update
+    //var soundIdRing:SystemSoundID = 1336
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        // ラベルを作る
-//        myLabel = UILabel(frame: CGRect(x:0,y:0, width:200,height:50))
-//        myLabel.backgroundColor = UIColor.orange
-//        myLabel.layer.masksToBounds = true
-//        myLabel.layer.cornerRadius = 20.0
-        timerDisp.text = "Time:".appendingFormat("%.1f",cnt)
-//        myLabel.textColor = UIColor.white
-//        myLabel.shadowColor = UIColor.gray
-//        myLabel.textAlignment = NSTextAlignment.center
-//        myLabel.layer.position = CGPoint(x: self.view.bounds.width/2, y: 200)
-//        self.view.backgroundColor = UIColor.cyan
-//        self.view.addSubview(myLabel)
+        // 時刻表示用設定
+        formatter.unitsStyle = .positional
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.zeroFormattingBehavior = DateComponentsFormatter.ZeroFormattingBehavior.pad
+        
+        // 時刻表示
+        timerDisp.text = "Time: ".appendingFormat(formatter.string(from: cnt)!)
         timerBtn.setTitle("Start", for:UIControlState.normal)
         // タイマーを作る
         Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(ViewController.onUpdate(timer:)), userInfo: nil, repeats: true)
@@ -50,6 +57,7 @@ class ViewController: UIViewController {
         } else {
             swflg = true
             timerBtn.setTitle("Stop", for:UIControlState.normal)
+            alertAction()
         }
     }
     // NSTierIntervalで指定された数秒ごとに呼び出されるメソッド
@@ -57,10 +65,7 @@ class ViewController: UIViewController {
     func onUpdate(timer : Timer){
         if (swflg) {
             cnt += 0.1
-            
-            // 桁数を指定して文字列を作る
-            let str = "Time:".appendingFormat("%.1f",cnt)
-            
+            let str = "Time: ".appendingFormat(formatter.string(from: cnt)!)
             timerDisp.text = str
         }
     }
@@ -68,6 +73,19 @@ class ViewController: UIViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    func alertAction() {
+        let myAlert = UIAlertController(title:"alert", message: "ring ding", preferredStyle: .actionSheet)
+        let myAction = UIAlertAction(title: "dong", style: .default) {
+            action in print("foo!!")
+        }
+        myAlert.addAction(myAction)
+        present(myAlert, animated: true, completion: nil)
+        if let soundUrl = CFBundleCopyResourceURL(CFBundleGetMainBundle(), nil, nil, nil){
+            AudioServicesCreateSystemSoundID(soundUrl, &soundIdRing)
+            AudioServicesPlaySystemSound(soundIdRing)
+        }
     }
 
 
