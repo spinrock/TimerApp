@@ -10,12 +10,16 @@ import UIKit
 import AudioToolbox
 
 class ViewController: UIViewController {
+    
+    // タイマーのタイトル用
+    @IBOutlet weak var timerTitle: UILabel!
+    
     // 時間表示用のラベル
     @IBOutlet weak var timerDisp: UILabel!
     
     @IBOutlet weak var timerBtn: UIButton!
     // 時間計測用の変数
-    var cnt : Double = 0
+    var cnt : Double = 60.0
     let formatter = DateComponentsFormatter()
 
     // スイッチ用のフラグ
@@ -49,6 +53,7 @@ class ViewController: UIViewController {
         Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(ViewController.onUpdate(timer:)), userInfo: nil, repeats: true)
     }
 
+    //    タイマーボタンを押下した時の処理
     @IBAction func OnClickButton(_ sender: Any) {
         if (swflg){
             swflg = false
@@ -57,16 +62,20 @@ class ViewController: UIViewController {
         } else {
             swflg = true
             timerBtn.setTitle("Stop", for:UIControlState.normal)
-            alertAction()
         }
     }
+
     // NSTierIntervalで指定された数秒ごとに呼び出されるメソッド
     @objc
     func onUpdate(timer : Timer){
         if (swflg) {
-            cnt += 0.1
+            cnt -= 0.1
             let str = "Time: ".appendingFormat(formatter.string(from: cnt)!)
             timerDisp.text = str
+            if (cnt < 0.1){
+                swflg = false
+                alertAction()
+            }
         }
     }
     
